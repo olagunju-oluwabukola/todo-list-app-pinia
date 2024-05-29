@@ -1,0 +1,8 @@
+@import './base.css';
+
+@import 'primeicons/primeicons.css';
+
+
+body{
+  margin: 2rem;
+}

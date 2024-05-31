@@ -3,17 +3,8 @@ import { defineStore } from 'pinia'
 
 export const useTaskStore = defineStore('TaskStore',{
     state: () =>({
-        task: [
-            {id: 1, title: 'Accessing the store', isFav:true},
-            {id: 2, title: 'subscribing to the store', isFav: true},
-            {id: 3, title: 'Store Mutation', isFav: false},
-            {id: 4, title: 'Resetting the store', isFav: false},
-            {id: 5, title: 'Getters', isFav: true},
-            {id: 6, title: 'Action', isFav: false},
-            
-
-           
-        ],
+        task: [],
+        isLoading : false,
         name: 'State Management: Pinia'
     }),
     getters:{
@@ -32,17 +23,54 @@ export const useTaskStore = defineStore('TaskStore',{
     }
 },
 actions :{
-    addTask(newTask){
-        this.task.push(newTask)
+    async getTask(){
+        this.isLoading = true
+        const response = await fetch('http://localhost:3000/task')
+        const data = await response.json()
+        this.task = data
+        this.isLoading = false 
     },
-    deleteTask(id){
+
+     async addTask(newTask){
+        this.task.push(newTask)
+
+        const response = await fetch ('http://localhost:3000/task',{
+            method: "post",
+            body: JSON.stringify(newTask),
+            headers: {'Content-Type' : 'application/json'}
+
+        })
+        if (response.error){
+            console.log(response.error)
+        }
+
+
+    },
+   async  deleteTask(id){
         this.task = this.task.filter(t =>{
             return t.id !== id
-        })
+             })
+             const response = await fetch ('http://localhost:3000/task/' + id,{
+                method: "DELETE",
+    
+            })
+            if (response.error){
+                console.log(response.error)
+            }
     },
-    toggleFav(id){
+    async toggleFav(id){
          const tasks = this.task.find(t => t.id === id)
          tasks.isFav = ! tasks.isFav
+
+         const response = await fetch ('http://localhost:3000/task',{
+            method: "PATCH",
+            body: JSON.stringify({isFav: tasks.isFav}),
+            headers: {'Content-Type' : 'application/json'}
+
+        })
+        if (response.error){
+            console.log(response.error)
+        }
     }
 }
 })
